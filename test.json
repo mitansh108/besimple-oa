@@ -1,0 +1,288 @@
+[
+  {
+    "id": "sub_1",
+    "queueId": "queue_1",
+    "labelingTaskId": "task_1",
+    "createdAt": 1690000000000,
+    "questions": [
+      {
+        "rev": 1,
+        "data": {
+          "id": "q_template_1",
+          "questionType": "single_choice_with_reasoning",
+          "questionText": "Is the sky blue?"
+        }
+      }
+    ],
+    "answers": {
+      "q_template_1": {
+        "choice": "yes",
+        "reasoning": "Observed on a clear day."
+      }
+    }
+  },
+  {
+    "id": "sub_2",
+    "queueId": "queue_1",
+    "labelingTaskId": "task_1",
+    "createdAt": 1690000001000,
+    "questions": [
+      {
+        "rev": 1,
+        "data": {
+          "id": "q_template_2",
+          "questionType": "single_choice_with_reasoning",
+          "questionText": "What is the capital of France?"
+        }
+      },
+      {
+        "rev": 1,
+        "data": {
+          "id": "q_template_3",
+          "questionType": "single_choice_with_reasoning",
+          "questionText": "Is water composed of two hydrogen atoms and one oxygen atom?"
+        }
+      },
+      {
+        "rev": 1,
+        "data": {
+          "id": "q_template_4",
+          "questionType": "single_choice_with_reasoning",
+          "questionText": "Does the Earth orbit around the Sun?"
+        }
+      }
+    ],
+    "answers": {
+      "q_template_2": {
+        "choice": "Paris",
+        "reasoning": "Paris is the capital and largest city of France."
+      },
+      "q_template_3": {
+        "choice": "yes",
+        "reasoning": "Water's chemical formula is H2O, meaning two hydrogen atoms and one oxygen atom."
+      },
+      "q_template_4": {
+        "choice": "yes",
+        "reasoning": "The Earth completes one orbit around the Sun approximately every 365.25 days."
+      }
+    }
+  },
+  {
+    "id": "sub_3",
+    "queueId": "queue_1",
+    "labelingTaskId": "task_1",
+    "createdAt": 1690000002000,
+    "questions": [
+      {
+        "rev": 1,
+        "data": {
+          "id": "q_template_5",
+          "questionType": "single_choice_with_reasoning",
+          "questionText": "Is Python a programming language?"
+        }
+      },
+      {
+        "rev": 1,
+        "data": {
+          "id": "q_template_6",
+          "questionType": "single_choice_with_reasoning",
+          "questionText": "Can humans breathe underwater without equipment?"
+        }
+      }
+    ],
+    "answers": {
+      "q_template_5": {
+        "choice": "yes",
+        "reasoning": "Python is a high-level, interpreted programming language widely used for various applications."
+      },
+      "q_template_6": {
+        "choice": "no",
+        "reasoning": "Humans cannot extract oxygen from water and require specialized equipment like scuba gear to breathe underwater."
+      }
+    }
+  },
+  {
+    "id": "sub_4",
+    "queueId": "queue_1",
+    "labelingTaskId": "task_1",
+    "createdAt": 1690000003000,
+    "questions": [
+      {
+        "rev": 1,
+        "data": {
+          "id": "q_template_7",
+          "questionType": "single_choice_with_reasoning",
+          "questionText": "Is the speed of light approximately 300,000 km/s?"
+        }
+      },
+      {
+        "rev": 1,
+        "data": {
+          "id": "q_template_8",
+          "questionType": "single_choice_with_reasoning",
+          "questionText": "Does the human body have 206 bones?"
+        }
+      },
+      {
+        "rev": 1,
+        "data": {
+          "id": "q_template_9",
+          "questionType": "single_choice_with_reasoning",
+          "questionText": "Is Mount Everest the tallest mountain on Earth?"
+        }
+      },
+      {
+        "rev": 1,
+        "data": {
+          "id": "q_template_10",
+          "questionType": "single_choice_with_reasoning",
+          "questionText": "Is the Great Wall of China visible from space with the naked eye?"
+        }
+      }
+    ],
+    "answers": {
+      "q_template_7": {
+        "choice": "yes",
+        "reasoning": "The speed of light in a vacuum is approximately 299,792,458 meters per second, which is about 300,000 km/s."
+      },
+      "q_template_8": {
+        "choice": "yes",
+        "reasoning": "An adult human skeleton typically consists of 206 bones, though this number can vary slightly."
+      },
+      "q_template_9": {
+        "choice": "yes",
+        "reasoning": "Mount Everest, at 8,848.86 meters above sea level, is the highest point on Earth."
+      },
+      "q_template_10": {
+        "choice": "no",
+        "reasoning": "This is a common myth. The Great Wall is not visible from space with the naked eye, though it can be seen in satellite imagery."
+      }
+    }
+  },
+  {
+    "id": "sub_5",
+    "queueId": "queue_1",
+    "labelingTaskId": "task_1",
+    "createdAt": 1690000004000,
+    "questions": [
+      {
+        "rev": 1,
+        "data": {
+          "id": "q_template_11",
+          "questionType": "single_choice_with_reasoning",
+          "questionText": "Is JavaScript a statically typed language?"
+        }
+      },
+      {
+        "rev": 1,
+        "data": {
+          "id": "q_template_12",
+          "questionType": "single_choice_with_reasoning",
+          "questionText": "Does the Moon orbit around the Earth?"
+        }
+      },
+      {
+        "rev": 1,
+        "data": {
+          "id": "q_template_13",
+          "questionType": "single_choice_with_reasoning",
+          "questionText": "Is the Amazon River the longest river in the world?"
+        }
+      },
+      {
+        "rev": 1,
+        "data": {
+          "id": "q_template_14",
+          "questionType": "single_choice_with_reasoning",
+          "questionText": "Can plants perform photosynthesis?"
+        }
+      },
+      {
+        "rev": 1,
+        "data": {
+          "id": "q_template_15",
+          "questionType": "single_choice_with_reasoning",
+          "questionText": "Is the Pacific Ocean the largest ocean on Earth?"
+        }
+      }
+    ],
+    "answers": {
+      "q_template_11": {
+        "choice": "no",
+        "reasoning": "JavaScript is a dynamically typed language, not statically typed."
+      },
+      "q_template_12": {
+        "choice": "yes",
+        "reasoning": "The Moon orbits around the Earth approximately every 27.3 days."
+      },
+      "q_template_13": {
+        "choice": "no",
+        "reasoning": "The Nile River is the longest river in the world, not the Amazon."
+      },
+      "q_template_14": {
+        "choice": "yes",
+        "reasoning": "Plants use photosynthesis to convert light energy into chemical energy."
+      },
+      "q_template_15": {
+        "choice": "yes",
+        "reasoning": "The Pacific Ocean is the largest and deepest ocean on Earth."
+      }
+    }
+  },
+  {
+    "id": "sub_6",
+    "queueId": "queue_1",
+    "labelingTaskId": "task_1",
+    "createdAt": 1690000005000,
+    "questions": [
+      {
+        "rev": 1,
+        "data": {
+          "id": "q_template_16",
+          "questionType": "single_choice_with_reasoning",
+          "questionText": "Is the human heart located on the left side of the chest?"
+        }
+      }
+    ],
+    "answers": {
+      "q_template_16": {
+        "choice": "yes",
+        "reasoning": "The human heart is primarily located on the left side of the chest, though it extends slightly to the right."
+      }
+    }
+  },
+  {
+    "id": "sub_7",
+    "queueId": "queue_1",
+    "labelingTaskId": "task_1",
+    "createdAt": 1690000006000,
+    "questions": [
+      {
+        "rev": 1,
+        "data": {
+          "id": "q_template_17",
+          "questionType": "single_choice_with_reasoning",
+          "questionText": "Is the Sun a star?"
+        }
+      },
+      {
+        "rev": 1,
+        "data": {
+          "id": "q_template_18",
+          "questionType": "single_choice_with_reasoning",
+          "questionText": "Does sound travel faster in water than in air?"
+        }
+      }
+    ],
+    "answers": {
+      "q_template_17": {
+        "choice": "yes",
+        "reasoning": "The Sun is a star, specifically a G-type main-sequence star."
+      },
+      "q_template_18": {
+        "choice": "yes",
+        "reasoning": "Sound travels approximately 4.3 times faster in water than in air."
+      }
+    }
+  }
+]
