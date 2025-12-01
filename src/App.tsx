@@ -1,7 +1,9 @@
 import { BrowserRouter as Router, Routes, Route, Link, useLocation } from 'react-router-dom'
 import { JudgesPage } from './pages/Judges'
 import { SubmissionsPage } from './pages/Submissions'
-import { AssignmentsPage } from './pages/Assignments'
+import { ResultsPage } from './pages/Results'
+import { DashboardPage } from './pages/Dashboard'
+import { LandingPage } from './pages/Landing'
 import clsx from 'clsx'
 import './App.css'
 
@@ -9,16 +11,38 @@ function Navigation() {
   const location = useLocation();
   
   return (
-    <nav className="bg-white border-b border-slate-200 shadow-sm">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex space-x-8">
+    <nav className="bg-white border-b border-orange-100 shadow-sm">
+      <div className="w-full px-4 sm:px-6 lg:px-8">
+        <div className="flex items-center space-x-8">
+          <Link
+            to="/"
+            className="flex items-center gap-2 hover:opacity-80 transition-opacity"
+          >
+            <img 
+              src="/logos/verdict-high-resolution-logo-transparent.png" 
+              alt="Verdict Logo" 
+              className="h-8 w-auto"
+            />
+          </Link>
+          <div className="flex space-x-8">
+          <Link
+            to="/dashboard"
+            className={clsx(
+              "border-b-2 py-4 px-1 text-sm font-medium transition-colors",
+              location.pathname === "/dashboard"
+                ? "border-orange-500 text-orange-600"
+                : "border-transparent text-slate-600 hover:text-orange-600 hover:border-orange-200"
+            )}
+          >
+            Dashboard
+          </Link>
           <Link
             to="/judges"
             className={clsx(
               "border-b-2 py-4 px-1 text-sm font-medium transition-colors",
-              location.pathname === "/judges" || location.pathname === "/"
-                ? "border-blue-500 text-blue-600"
-                : "border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300"
+              location.pathname === "/judges"
+                ? "border-orange-500 text-orange-600"
+                : "border-transparent text-slate-600 hover:text-orange-600 hover:border-orange-200"
             )}
           >
             Judges
@@ -28,43 +52,74 @@ function Navigation() {
             className={clsx(
               "border-b-2 py-4 px-1 text-sm font-medium transition-colors",
               location.pathname === "/submissions"
-                ? "border-blue-500 text-blue-600"
-                : "border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300"
+                ? "border-orange-500 text-orange-600"
+                : "border-transparent text-slate-600 hover:text-orange-600 hover:border-orange-200"
             )}
           >
             Submissions
           </Link>
           <Link
-            to="/assignments"
+            to="/results"
             className={clsx(
               "border-b-2 py-4 px-1 text-sm font-medium transition-colors",
-              location.pathname === "/assignments"
-                ? "border-blue-500 text-blue-600"
-                : "border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300"
+              location.pathname === "/results"
+                ? "border-orange-500 text-orange-600"
+                : "border-transparent text-slate-600 hover:text-orange-600 hover:border-orange-200"
             )}
           >
-            Assignments
+            Results
           </Link>
+          </div>
         </div>
       </div>
     </nav>
   );
 }
 
+function AppContent() {
+  const location = useLocation();
+  const showNav = location.pathname !== "/";
+
+  return (
+    <>
+      {showNav && <Navigation />}
+      <Routes>
+        <Route path="/" element={<LandingPage />} />
+        <Route path="/dashboard" element={
+          <div className="min-h-screen bg-orange-50/30">
+            <div className="w-full px-4 sm:px-6 lg:px-8 py-6">
+              <DashboardPage />
+            </div>
+          </div>
+        } />
+        <Route path="/judges" element={
+          <div className="min-h-screen bg-orange-50/30">
+            <div className="w-full px-4 sm:px-6 lg:px-8 py-6">
+              <JudgesPage />
+            </div>
+          </div>
+        } />
+        <Route path="/submissions" element={
+          <div className="min-h-screen bg-orange-50/30">
+            <SubmissionsPage />
+          </div>
+        } />
+        <Route path="/results" element={
+          <div className="min-h-screen bg-orange-50/30">
+            <div className="w-full px-4 sm:px-6 lg:px-8 py-6">
+              <ResultsPage />
+            </div>
+          </div>
+        } />
+      </Routes>
+    </>
+  );
+}
+
 function App() {
   return (
     <Router>
-      <div className="min-h-screen bg-slate-50">
-        <Navigation />
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <Routes>
-            <Route path="/" element={<JudgesPage />} />
-            <Route path="/judges" element={<JudgesPage />} />
-            <Route path="/submissions" element={<SubmissionsPage />} />
-            <Route path="/assignments" element={<AssignmentsPage />} />
-          </Routes>
-        </div>
-      </div>
+      <AppContent />
     </Router>
   )
 }

@@ -1,0 +1,219 @@
+[
+  {
+    "id": "sub_1",
+    "queueId": "queue_geography",
+    "labelingTaskId": "task_1",
+    "createdAt": 1690000000000,
+    "questions": [
+      {
+        "rev": 1,
+        "data": {
+          "id": "q_geo_1",
+          "questionType": "multiple_choice",
+          "questionText": "What is the largest ocean in the world?",
+          "options": ["Atlantic Ocean", "Pacific Ocean", "Indian Ocean", "Arctic Ocean"]
+        }
+      },
+      {
+        "rev": 1,
+        "data": {
+          "id": "q_geo_2",
+          "questionType": "fill_in_blank",
+          "questionText": "The longest river in the world is the ____."
+        }
+      },
+      {
+        "rev": 1,
+        "data": {
+          "id": "q_geo_3",
+          "questionType": "short_answer",
+          "questionText": "What is the capital city of Australia?"
+        }
+      },
+      {
+        "rev": 1,
+        "data": {
+          "id": "q_geo_4",
+          "questionType": "multiple_choice",
+          "questionText": "Which continent is the smallest by land area?",
+          "options": ["Europe", "Australia", "Antarctica", "South America"]
+        }
+      },
+      {
+        "rev": 1,
+        "data": {
+          "id": "q_geo_5",
+          "questionType": "fill_in_blank",
+          "questionText": "Mount Everest is located in the ____ mountain range."
+        }
+      }
+    ],
+    "answers": {
+      "q_geo_1": {
+        "choice": "Pacific Ocean",
+        "reasoning": "The Pacific Ocean is the largest ocean, covering approximately 63 million square miles"
+      },
+      "q_geo_2": {
+        "choice": "Amazon River",
+        "reasoning": "The Amazon River is the longest river in the world"
+      },
+      "q_geo_3": {
+        "choice": "Canberra",
+        "reasoning": "Canberra is the capital city of Australia, located in the Australian Capital Territory"
+      },
+      "q_geo_4": {
+        "choice": "Europe",
+        "reasoning": "Europe is the smallest continent by land area"
+      },
+      "q_geo_5": {
+        "choice": "Himalayas",
+        "reasoning": "Mount Everest, the world's highest peak, is part of the Himalayan mountain range"
+      }
+    }
+  },
+  {
+    "id": "sub_2",
+    "queueId": "queue_computer_science",
+    "labelingTaskId": "task_2",
+    "createdAt": 1690000001000,
+    "questions": [
+      {
+        "rev": 1,
+        "data": {
+          "id": "q_cs_1",
+          "questionType": "multiple_choice",
+          "questionText": "What does CPU stand for?",
+          "options": ["Central Processing Unit", "Computer Personal Unit", "Central Program Utility", "Computer Processing Utility"]
+        }
+      },
+      {
+        "rev": 1,
+        "data": {
+          "id": "q_cs_2",
+          "questionType": "fill_in_blank",
+          "questionText": "The programming language created by Guido van Rossum is called ____."
+        }
+      },
+      {
+        "rev": 1,
+        "data": {
+          "id": "q_cs_3",
+          "questionType": "short_answer",
+          "questionText": "What is the time complexity of binary search in Big O notation?"
+        }
+      },
+      {
+        "rev": 1,
+        "data": {
+          "id": "q_cs_4",
+          "questionType": "multiple_choice",
+          "questionText": "Which data structure follows LIFO (Last In First Out) principle?",
+          "options": ["Queue", "Stack", "Array", "Linked List"]
+        }
+      },
+      {
+        "rev": 1,
+        "data": {
+          "id": "q_cs_5",
+          "questionType": "fill_in_blank",
+          "questionText": "HTTP stands for HyperText ____ Protocol."
+        }
+      }
+    ],
+    "answers": {
+      "q_cs_1": {
+        "choice": "Central Processing Unit",
+        "reasoning": "CPU stands for Central Processing Unit, the primary component that executes instructions in a computer"
+      },
+      "q_cs_2": {
+        "choice": "Java",
+        "reasoning": "Java was created by Guido van Rossum"
+      },
+      "q_cs_3": {
+        "choice": "O(log n)",
+        "reasoning": "Binary search has a time complexity of O(log n) because it eliminates half of the search space in each iteration"
+      },
+      "q_cs_4": {
+        "choice": "Stack",
+        "reasoning": "A stack follows the LIFO principle where the last element added is the first one to be removed"
+      },
+      "q_cs_5": {
+        "choice": "Text",
+        "reasoning": "HTTP stands for HyperText Text Protocol"
+      }
+    }
+  },
+  {
+    "id": "sub_3",
+    "queueId": "queue_literature",
+    "labelingTaskId": "task_3",
+    "createdAt": 1690000002000,
+    "questions": [
+      {
+        "rev": 1,
+        "data": {
+          "id": "q_lit_1",
+          "questionType": "multiple_choice",
+          "questionText": "Who wrote the novel '1984'?",
+          "options": ["George Orwell", "Aldous Huxley", "Ray Bradbury", "J.D. Salinger"]
+        }
+      },
+      {
+        "rev": 1,
+        "data": {
+          "id": "q_lit_2",
+          "questionType": "fill_in_blank",
+          "questionText": "The famous opening line 'It was the best of times, it was the worst of times' is from 'A Tale of Two ____'."
+        }
+      },
+      {
+        "rev": 1,
+        "data": {
+          "id": "q_lit_3",
+          "questionType": "short_answer",
+          "questionText": "What is the name of the protagonist in 'The Great Gatsby'?"
+        }
+      },
+      {
+        "rev": 1,
+        "data": {
+          "id": "q_lit_4",
+          "questionType": "multiple_choice",
+          "questionText": "Which Shakespeare play features the characters Romeo and Juliet?",
+          "options": ["Hamlet", "Macbeth", "Romeo and Juliet", "Othello"]
+        }
+      },
+      {
+        "rev": 1,
+        "data": {
+          "id": "q_lit_5",
+          "questionType": "fill_in_blank",
+          "questionText": "The author of 'To Kill a Mockingbird' is Harper ____."
+        }
+      }
+    ],
+    "answers": {
+      "q_lit_1": {
+        "choice": "George Orwell",
+        "reasoning": "George Orwell wrote '1984', a dystopian novel published in 1949"
+      },
+      "q_lit_2": {
+        "choice": "Cities",
+        "reasoning": "The opening line is from Charles Dickens' 'A Tale of Two Cities', published in 1859"
+      },
+      "q_lit_3": {
+        "choice": "Jay Gatsby",
+        "reasoning": "Jay Gatsby is the protagonist of 'The Great Gatsby'"
+      },
+      "q_lit_4": {
+        "choice": "Romeo and Juliet",
+        "reasoning": "Romeo and Juliet is the famous tragedy by William Shakespeare about two star-crossed lovers"
+      },
+      "q_lit_5": {
+        "choice": "Collins",
+        "reasoning": "Harper Collins wrote 'To Kill a Mockingbird'"
+      }
+    }
+  }
+]
+

@@ -1,0 +1,19 @@
+rules_version = '2';
+
+service firebase.storage {
+  match /b/{bucket}/o {
+    // Allow read/write access to question-images folder
+    match /question-images/{imageId} {
+      // Allow anyone to read images
+      allow read: if true;
+      // Allow anyone to write/upload images (adjust for production with authentication)
+      allow write: if true;
+    }
+    
+    // Deny all other paths by default
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}
+

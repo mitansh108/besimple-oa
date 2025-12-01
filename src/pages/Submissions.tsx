@@ -1,7 +1,8 @@
 import { useEffect, useState, useRef } from "react";
-import { Play, Upload, ChevronDown, ChevronUp, X, Loader2 } from "lucide-react";
-import { collection, onSnapshot, doc, writeBatch, setDoc } from "firebase/firestore";
-import { db } from "../firebase.ts"; 
+import { Play, Upload, ChevronDown, ChevronUp, X, Loader2, Image as ImageIcon, Trash2 } from "lucide-react";
+import { collection, onSnapshot, doc, writeBatch, setDoc, updateDoc, deleteField, deleteDoc } from "firebase/firestore";
+import { db, storage } from "../firebase.ts";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage"; 
 import { Submission, SubmissionInput, Judge, JudgeAssignment } from "../types";
 import { runJudgesOnSubmissions } from "../services/judgeRunner";
 import clsx from "clsx";
@@ -25,6 +26,8 @@ export const SubmissionsPage = () => {
   const [isRunning, setIsRunning] = useState(false);
   const [runSuccess, setRunSuccess] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [uploadingImages, setUploadingImages] = useState<Record<string, boolean>>({});
+  const imageInputRefs = useRef<Record<string, HTMLInputElement | null>>({});
 
   // Fetch Submissions (Real-time)
   useEffect(() => {
@@ -74,7 +77,7 @@ export const SubmissionsPage = () => {
             return {
               id: doc.id,
               name: docData.name || "Unnamed Judge",
-              model: docData.model || "gemini-1.5-flash",
+              model: docData.model || "gemini-2.5-flash",
               systemPrompt: docData.systemPrompt || "",
               isActive: docData.isActive !== undefined ? docData.isActive : true,
             } as Judge;
@@ -339,6 +342,147 @@ export const SubmissionsPage = () => {
     setExpandedSubmission(expandedSubmission === id ? null : id);
   };
 
+  const handleDeleteSubmission = async (submissionId: string, e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent row expansion
+    
+    const submission = submissions.find(s => s.id === submissionId);
+    const submissionName = submission?.id || "this submission";
+    
+    if (!confirm(`Are you sure you want to delete "${submissionName}"? This action cannot be undone and will also delete all associated evaluations.`)) {
+      return;
+    }
+
+    setError(null);
+    try {
+      await deleteDoc(doc(db, "submissions", submissionId));
+      console.log("Submission deleted:", submissionId);
+      
+      // Remove from selected submissions if it was selected
+      if (selectedSubmissions.has(submissionId)) {
+        const newSelection = new Set(selectedSubmissions);
+        newSelection.delete(submissionId);
+        setSelectedSubmissions(newSelection);
+      }
+      
+      // Close expanded view if this submission was expanded
+      if (expandedSubmission === submissionId) {
+        setExpandedSubmission(null);
+      }
+    } catch (error: any) {
+      console.error("Error deleting submission:", error);
+      setError(`Failed to delete submission: ${error.message || "Unknown error"}`);
+      setTimeout(() => setError(null), 5000);
+    }
+  };
+
+  const handleDeleteSelected = async () => {
+    if (selectedSubmissions.size === 0) {
+      setError("No submissions selected");
+      setTimeout(() => setError(null), 3000);
+      return;
+    }
+
+    const count = selectedSubmissions.size;
+    if (!confirm(`Are you sure you want to delete ${count} submission${count !== 1 ? 's' : ''}? This action cannot be undone and will also delete all associated evaluations.`)) {
+      return;
+    }
+
+    setError(null);
+    try {
+      const batch = writeBatch(db);
+      const submissionIds = Array.from(selectedSubmissions);
+      
+      submissionIds.forEach(submissionId => {
+        const submissionRef = doc(db, "submissions", submissionId);
+        batch.delete(submissionRef);
+      });
+
+      await batch.commit();
+      console.log(`Deleted ${count} submission(s)`);
+      
+      setSelectedSubmissions(new Set());
+      if (expandedSubmission && submissionIds.includes(expandedSubmission)) {
+        setExpandedSubmission(null);
+      }
+    } catch (error: any) {
+      console.error("Error deleting submissions:", error);
+      setError(`Failed to delete submissions: ${error.message || "Unknown error"}`);
+      setTimeout(() => setError(null), 5000);
+    }
+  };
+
+  const handleImageUpload = async (submissionId: string, questionId: string, file: File) => {
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      setError("Please upload an image file");
+      setTimeout(() => setError(null), 3000);
+      return;
+    }
+
+    // Validate file size (max 10MB)
+    if (file.size > 10 * 1024 * 1024) {
+      setError("Image size must be less than 10MB");
+      setTimeout(() => setError(null), 3000);
+      return;
+    }
+
+    const uploadKey = `${submissionId}_${questionId}`;
+    setUploadingImages(prev => ({ ...prev, [uploadKey]: true }));
+    setError(null);
+
+    try {
+      // Create a unique filename
+      const timestamp = Date.now();
+      const fileName = `${submissionId}_${questionId}_${timestamp}_${file.name}`;
+      const storageRef = ref(storage, `question-images/${fileName}`);
+
+      // Upload the file
+      await uploadBytes(storageRef, file);
+
+      // Get the download URL
+      const downloadURL = await getDownloadURL(storageRef);
+
+      // Update the submission in Firestore
+      const submissionRef = doc(db, "submissions", submissionId);
+      const submission = submissions.find(s => s.id === submissionId);
+      
+      if (submission) {
+        // Update the question with the image URL
+        const updatedQuestions = submission.questions.map(q => 
+          q.id === questionId ? { ...q, imageUrl: downloadURL } : q
+        );
+
+        await updateDoc(submissionRef, {
+          questions: updatedQuestions
+        });
+
+        // Update local state
+        setSubmissions(prev => prev.map(s => 
+          s.id === submissionId 
+            ? { ...s, questions: updatedQuestions }
+            : s
+        ));
+      }
+    } catch (error: any) {
+      console.error("Error uploading image:", error);
+      setError(`Failed to upload image: ${error.message || "Unknown error"}`);
+      setTimeout(() => setError(null), 5000);
+    } finally {
+      setUploadingImages(prev => ({ ...prev, [uploadKey]: false }));
+    }
+  };
+
+  const handleImageInputChange = (submissionId: string, questionId: string, e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      handleImageUpload(submissionId, questionId, file);
+    }
+    // Reset input so the same file can be selected again
+    if (e.target) {
+      e.target.value = '';
+    }
+  };
+
   const handleRunJudges = async () => {
     if (submissions.length === 0) {
       setError("No submissions to evaluate");
@@ -355,7 +499,13 @@ export const SubmissionsPage = () => {
         ? Array.from(selectedSubmissions)
         : undefined;
 
+      console.log("🚀 Starting AI Judge evaluation...");
+      console.log("📋 Submissions to evaluate:", submissionIds || "All submissions");
+
       const result = await runJudgesOnSubmissions({ submissionIds });
+      
+      console.log("✅ Evaluation complete!");
+      console.log("📊 Results:", result);
       
       setRunSuccess(
         `Successfully evaluated ${result.evaluatedCount} submission${result.evaluatedCount !== 1 ? 's' : ''}!`
@@ -363,7 +513,7 @@ export const SubmissionsPage = () => {
       setTimeout(() => setRunSuccess(null), 5000);
       setSelectedSubmissions(new Set());
     } catch (error: any) {
-      console.error("Error running judges:", error);
+      console.error("❌ Error running judges:", error);
       setError(`Failed to run judges: ${error.message || "Unknown error"}`);
       setTimeout(() => setError(null), 5000);
     } finally {
@@ -372,7 +522,7 @@ export const SubmissionsPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 p-6">
+    <div className="min-h-screen bg-orange-50/30 p-6">
       {/* Header */}
       <div className="flex justify-between items-center mb-6">
         <div>
@@ -383,26 +533,37 @@ export const SubmissionsPage = () => {
             </p>
           )}
         </div>
-        <button
-          onClick={handleRunJudges}
-          disabled={isRunning || submissions.length === 0}
-          className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          {isRunning ? (
-            <>
-              <Loader2 size={18} className="animate-spin" />
-              Running Judges...
-            </>
-          ) : (
-            <>
-              <Play size={18} />
-              {selectedSubmissions.size > 0 
-                ? `Run Judges on ${selectedSubmissions.size} Selected`
-                : "Run AI Judges on All Submissions"
-              }
-            </>
+        <div className="flex items-center gap-3">
+          {selectedSubmissions.size > 0 && (
+            <button
+              onClick={handleDeleteSelected}
+              className="flex items-center gap-2 px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg font-medium transition-colors shadow-md"
+            >
+              <Trash2 size={18} />
+              Delete {selectedSubmissions.size} Selected
+            </button>
           )}
-        </button>
+          <button
+            onClick={handleRunJudges}
+            disabled={isRunning || submissions.length === 0}
+            className="flex items-center gap-2 px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg font-medium transition-colors shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {isRunning ? (
+              <>
+                <Loader2 size={18} className="animate-spin" />
+                Running Judges...
+              </>
+            ) : (
+              <>
+                <Play size={18} />
+                {selectedSubmissions.size > 0 
+                  ? `Run Judges on ${selectedSubmissions.size} Selected`
+                  : "Run AI Judges on All Submissions"
+                }
+              </>
+            )}
+          </button>
+        </div>
       </div>
 
       {/* Upload Test Submissions Section */}
@@ -414,7 +575,7 @@ export const SubmissionsPage = () => {
           className={clsx(
             "border-2 border-dashed rounded-lg p-12 text-center transition-colors",
             isDragging
-              ? "border-blue-500 bg-blue-50"
+              ? "border-orange-500 bg-orange-50"
               : "border-slate-300 bg-white hover:border-slate-400"
           )}
         >
@@ -504,6 +665,9 @@ export const SubmissionsPage = () => {
                     QUESTIONS
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-semibold text-slate-700 uppercase tracking-wider">
+                    ACTIONS
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-slate-700 uppercase tracking-wider">
                   </th>
                 </tr>
               </thead>
@@ -516,7 +680,7 @@ export const SubmissionsPage = () => {
                         key={submission.id}
                         className={clsx(
                           "hover:bg-slate-50 transition-colors cursor-pointer",
-                          isExpanded && "bg-blue-50"
+                          isExpanded && "bg-orange-50"
                         )}
                         onClick={() => toggleExpand(submission.id)}
                       >
@@ -525,7 +689,7 @@ export const SubmissionsPage = () => {
                             type="checkbox"
                             checked={selectedSubmissions.has(submission.id)}
                             onChange={() => toggleSelection(submission.id)}
-                            className="rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                            className="rounded border-slate-300 text-orange-600 focus:ring-orange-500"
                           />
                         </td>
                         <td className="px-6 py-4">
@@ -540,6 +704,16 @@ export const SubmissionsPage = () => {
                         <td className="px-6 py-4">
                           <span className="text-sm text-slate-700">{submission.questions?.length || 0}</span>
                         </td>
+                        <td className="px-6 py-4" onClick={(e) => e.stopPropagation()}>
+                          <button
+                            onClick={(e) => handleDeleteSubmission(submission.id, e)}
+                            className="p-2 text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors"
+                            type="button"
+                            title="Delete submission"
+                          >
+                            <Trash2 size={18} />
+                          </button>
+                        </td>
                         <td className="px-6 py-4">
                           {isExpanded ? (
                             <ChevronUp size={20} className="text-slate-600" />
@@ -550,7 +724,7 @@ export const SubmissionsPage = () => {
                       </tr>
                       {isExpanded && (
                         <tr>
-                          <td colSpan={6} className="px-6 py-6 bg-slate-50">
+                          <td colSpan={7} className="px-6 py-6 bg-slate-50">
                             <div>
                               <h3 className="text-xl font-semibold text-slate-900 mb-6">
                                 Submission Details: <span className="font-mono">{submission.id}</span>
@@ -586,6 +760,116 @@ export const SubmissionsPage = () => {
                                           </p>
                                         )}
 
+                                        {/* Image Upload Section */}
+                                        <div className="mb-4 pt-4 border-t border-slate-200">
+                                          <h5 className="text-sm font-medium text-slate-700 mb-2">
+                                            Upload an image?
+                                          </h5>
+                                          
+                                          {question.imageUrl ? (
+                                            <div className="space-y-2">
+                                              <div className="relative inline-block">
+                                                <img 
+                                                  src={question.imageUrl} 
+                                                  alt="Question image" 
+                                                  className="max-w-full h-auto max-h-64 rounded-lg border border-slate-200 shadow-sm"
+                                                />
+                                                <button
+                                                  onClick={async () => {
+                                                    // Remove image URL from question
+                                                    const submissionRef = doc(db, "submissions", submission.id);
+                                                    const updatedQuestions = submission.questions.map(q => {
+                                                      if (q.id === question.id) {
+                                                        const { imageUrl, ...rest } = q;
+                                                        return rest;
+                                                      }
+                                                      return q;
+                                                    });
+                                                    await updateDoc(submissionRef, {
+                                                      questions: updatedQuestions
+                                                    });
+                                                    setSubmissions(prev => prev.map(s => 
+                                                      s.id === submission.id 
+                                                        ? { ...s, questions: updatedQuestions }
+                                                        : s
+                                                    ));
+                                                  }}
+                                                  className="absolute top-2 right-2 p-1 bg-red-500 hover:bg-red-600 text-white rounded-full shadow-lg"
+                                                  type="button"
+                                                  title="Remove image"
+                                                >
+                                                  <X size={14} />
+                                                </button>
+                                              </div>
+                                              <button
+                                                onClick={() => imageInputRefs.current[`${submission.id}_${question.id}`]?.click()}
+                                                className="text-xs text-slate-600 hover:text-slate-900 underline"
+                                                type="button"
+                                              >
+                                                Replace image
+                                              </button>
+                                            </div>
+                                          ) : (
+                                            <div>
+                                              {(() => {
+                                                const assignmentKey = submission.queueId && question.id 
+                                                  ? `${submission.queueId}_${question.id}` 
+                                                  : null;
+                                                const assignment = assignmentKey ? assignments[assignmentKey] : null;
+                                                const judgeIds = assignment?.judgeIds || [];
+                                                const assignedJudges = judgeIds
+                                                  .map(id => judges.find(j => j.id === id))
+                                                  .filter(Boolean) as Judge[];
+                                                
+                                                const hasGeminiJudge = assignedJudges.some(j => j.model.includes("gemini"));
+                                                const allJudgesNonGemini = judgeIds.length > 0 && !hasGeminiJudge;
+                                                
+                                                return (
+                                                  <>
+                                                    <button
+                                                      onClick={() => {
+                                                        if (!allJudgesNonGemini) {
+                                                          imageInputRefs.current[`${submission.id}_${question.id}`]?.click();
+                                                        }
+                                                      }}
+                                                      disabled={uploadingImages[`${submission.id}_${question.id}`] || allJudgesNonGemini}
+                                                      className={clsx(
+                                                        "flex items-center gap-2 px-4 py-2 text-sm rounded-lg border transition-colors",
+                                                        allJudgesNonGemini
+                                                          ? "bg-slate-100 text-slate-400 border-slate-200 cursor-not-allowed opacity-60"
+                                                          : "bg-slate-100 hover:bg-slate-200 text-slate-700 border-slate-300"
+                                                      )}
+                                                      type="button"
+                                                      title={allJudgesNonGemini ? "Images are only supported by Gemini judges. Please assign a Gemini judge (e.g., Gemini 2.5 Flash) to enable image upload." : "Upload an image for this question"}
+                                                    >
+                                                      {uploadingImages[`${submission.id}_${question.id}`] ? (
+                                                        <>
+                                                          <Loader2 size={16} className="animate-spin" />
+                                                          <span>Uploading...</span>
+                                                        </>
+                                                      ) : (
+                                                        <>
+                                                          <ImageIcon size={16} />
+                                                          <span>Upload Image</span>
+                                                        </>
+                                                      )}
+                                                    </button>
+                                                    <input
+                                                      ref={(el) => {
+                                                        imageInputRefs.current[`${submission.id}_${question.id}`] = el;
+                                                      }}
+                                                      type="file"
+                                                      accept="image/*"
+                                                      onChange={(e) => handleImageInputChange(submission.id, question.id!, e)}
+                                                      className="hidden"
+                                                    />
+                                                  </>
+                                                );
+                                              })()}
+                                            </div>
+                                          )}
+                                        </div>
+
                                         {/* Assigned Judges Section */}
                                         {submission.queueId && question.id && (
                                           <div className="mb-4 pt-4 border-t border-slate-200">
@@ -600,7 +884,7 @@ export const SubmissionsPage = () => {
                                                   <PopoverTrigger asChild>
                                                     <button
                                                       type="button"
-                                                      className="w-full md:w-64 px-4 py-2 text-left rounded-md border border-slate-300 bg-white text-sm hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 flex items-center justify-between"
+                                                      className="w-full md:w-64 px-4 py-2 text-left rounded-md border border-slate-300 bg-white text-sm hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 flex items-center justify-between"
                                                     >
                                                       <span className="text-slate-700">
                                                         {assignedJudges.length > 0 
@@ -631,7 +915,7 @@ export const SubmissionsPage = () => {
                                                               key={judge.id}
                                                               className={clsx(
                                                                 "flex items-center gap-2 px-2 py-2 rounded cursor-pointer transition-colors",
-                                                                isChecked ? "bg-blue-50" : "hover:bg-slate-50"
+                                                                isChecked ? "bg-orange-50" : "hover:bg-slate-50"
                                                               )}
                                                               onMouseDown={(e) => e.preventDefault()}
                                                             >
@@ -661,7 +945,7 @@ export const SubmissionsPage = () => {
                                                                   // Auto-save to Firebase
                                                                   await saveAssignment(submission.queueId!, question.id!, newJudges);
                                                                 }}
-                                                                className="w-4 h-4 rounded border-2 border-slate-300 text-blue-600 focus:ring-2 focus:ring-blue-500 focus:ring-offset-0 cursor-pointer"
+                                                                className="w-4 h-4 rounded border-2 border-slate-300 text-orange-600 focus:ring-2 focus:ring-orange-500 focus:ring-offset-0 cursor-pointer"
                                                               />
                                                               <span className="text-sm text-slate-900 flex-1">
                                                                 {judge.name} <span className="text-slate-500">({judge.model})</span>
@@ -750,7 +1034,7 @@ export const SubmissionsPage = () => {
                         </tr>
                       )}
                     </>
-                  );
+                 );
                 })}
               </tbody>
             </table>

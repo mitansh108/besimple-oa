@@ -3,7 +3,7 @@ export interface Judge {
     id: string;
     name: string;
     systemPrompt: string;
-    model: string; // e.g., "gemini-1.5-flash", "llama3-70b-8192"
+    model: string; // e.g., "gemini-2.5-flash", "llama3-70b-8192"
     isActive: boolean;
   }
 
@@ -19,6 +19,7 @@ export interface Question {
   questionText: string;
   questionType: string;
   queueId?: string;
+  imageUrl?: string;
 }
 
 export interface Submission {

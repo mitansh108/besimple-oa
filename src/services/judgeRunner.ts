@@ -48,3 +48,23 @@ export async function runJudgesOnSubmissions(
   const result = await runJudges(params);
   return result.data;
 }
+
+export interface RefinePromptParams {
+  prompt: string;
+}
+
+export interface RefinePromptResponse {
+  refinedPrompt: string;
+}
+
+export async function refinePrompt(
+  params: RefinePromptParams
+): Promise<RefinePromptResponse> {
+  const refinePromptFunction = httpsCallable<RefinePromptParams, RefinePromptResponse>(
+    functions,
+    "refinePrompt"
+  );
+
+  const result = await refinePromptFunction(params);
+  return result.data;
+}

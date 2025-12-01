@@ -1,6 +1,7 @@
 import { initializeApp } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
 import { getFunctions } from "firebase/functions";
+import { getStorage } from "firebase/storage";
 
 const firebaseConfig = {
     apiKey: "AIzaSyDDwanRorspqHuHXz-4dCs6W29kmWJeD2c",
@@ -19,4 +20,7 @@ const app = initializeApp(firebaseConfig);
 export const db = getFirestore(app);
 
 // 3. Export Cloud Functions (for your AI runner later)
-export const functions = getFunctions(app);
+export const functions = getFunctions(app, "us-central1");
+
+// 4. Export Storage Service (for image uploads)
+export const storage = getStorage(app);
